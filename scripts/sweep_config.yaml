@@ -1,0 +1,22 @@
+program: run_experiment.py
+method: bayes
+metric:
+  name: valid/infonce_acc
+  goal: maximize
+parameters:
+  batch_size:
+    values: [16, 32, 64, 128, 256]
+  init_learning_rate:
+    min: 0.000001  
+    max: 0.01
+  head_hidden_size:
+    values: [16, 32, 64, 128]
+  head_input_size:
+    values: [32, 64, 128, 256]
+command: >
+  - ${env}
+  - python
+  - ${program}
+  - "-b"
+  - "scripts/sweep-args.json"
+  - ${args}
