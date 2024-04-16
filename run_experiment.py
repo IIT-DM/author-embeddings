@@ -81,8 +81,8 @@ arg_parser.add_argument('--monitor_mode', type=str, required=False, choices=['ma
                         )
 arg_parser.add_argument('--valid_step_interval', type=int,
                         default=100, help='')
-arg_parser.add_argument('--no_iarpa', action='store_true',
-                        help='dont do Iarpa5 eval')
+# arg_parser.add_argument('--no_iarpa', action='store_true',
+#                         help='dont do Iarpa5 eval')
 arg_parser.add_argument('--model_max_length', type=int,
                         default=512, help='max input dimension/length of the model')
 arg_parser.add_argument('--num_to_multisample', type=int, nargs="+",
@@ -130,7 +130,7 @@ BASE_CODE = args.transformer
 CHECKPOINT = args.checkpoint
 MINIBATCH_SIZE = args.batch_size
 VALID_STEPS_INTERVAL = args.valid_step_interval
-NO_IARPA = args.no_iarpa
+# NO_IARPA = args.no_iarpa
 MODEL_MAX_LENGTH = args.model_max_length
 INIT_LEARNING_RATE = args.init_learning_rate
 DROPOUT = args.dropout
@@ -303,7 +303,7 @@ def main():
     # Name model
     model_datasets = '+'.join(USED_FILES)
     date_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    save_name = f'final_{date_time}'
+    save_name = f'final_{date_time}_{MODEL}_{model_datasets}'
 
     print(f'Saving model to {save_name}')
     # Callbacks
@@ -338,7 +338,7 @@ def main():
                       precision='16-mixed',
                       val_check_interval=VALID_STEPS_INTERVAL,
                       check_val_every_n_epoch=None,
-                      limit_val_batches=50,
+                    #   limit_val_batches=50,
                       num_sanity_val_steps=0,
                       #   accumulate_grad_batches=8,
                       callbacks=[checkpoint_callback, lr_monitor]
@@ -363,7 +363,7 @@ def main():
         "max_length": MODEL_MAX_LENGTH,
         "head_hidden_size": HEAD_HIDDEN_SIZE,
         "head_input_size": HEAD_INPUT_SIZE,
-        "no_iarpa": NO_IARPA,
+        # "no_iarpa": NO_IARPA,
         "final_output_dimension": PROJECTION_OUTPUT_SIZE,
         "chunk_length": CHUNK_LENGTH,
         "dropout": DROPOUT,
