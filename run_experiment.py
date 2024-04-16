@@ -80,7 +80,7 @@ arg_parser.add_argument('--monitor_mode', type=str, required=False, choices=['ma
                         default="max",
                         )
 arg_parser.add_argument('--valid_step_interval', type=int,
-                        default=250, help='')
+                        default=100, help='')
 arg_parser.add_argument('--no_iarpa', action='store_true',
                         help='dont do Iarpa5 eval')
 arg_parser.add_argument('--model_max_length', type=int,
@@ -115,7 +115,6 @@ arg_parser.add_argument('--unfreeze_layer_limit', type=int,
                         default=float('inf'), help='Maximum number of layers to unfreeze')
 arg_parser.add_argument('--unfreeze_direction', type=int, default=-1,
                         choices=[-1, 1], help='Unfreeze direction: 1 for input to output, -1 for output to input')
-arg_parser.add_argument('--valid_step_interval', type=int, default=100, help='Batch size')
 # arg_parser.add_argument('--wandb_project', required=True, type=str, help="The wandb_project to use")
 args = arg_parser.parse_args()
 
