@@ -22,8 +22,8 @@ def clean_and_save_csv(file_path):
     print(f"Saved cleaned file to {clean_file_path}")
 
 # File paths
-train_dir = '/share/lvegna/Repos/author/authorship-embeddings/data/nlp/blog_corpus/blog_train.csv'
-test_dir = '/share/lvegna/Repos/author/authorship-embeddings/data/nlp/blog_corpus/blog_test.csv'
+train_dir = 'data/nlp/blog_corpus/blog_train.csv'
+test_dir = 'data/nlp/blog_corpus/blog_test.csv'
 
 # Clean and save the files
 clean_and_save_csv(train_dir)
