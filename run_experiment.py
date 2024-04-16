@@ -81,8 +81,8 @@ arg_parser.add_argument('--monitor_mode', type=str, required=False, choices=['ma
                         )
 arg_parser.add_argument('--valid_step_interval', type=int,
                         default=100, help='')
-# arg_parser.add_argument('--no_iarpa', action='store_true',
-#                         help='dont do Iarpa5 eval')
+arg_parser.add_argument('--no_iarpa', action='store_true',
+                        help='dont do Iarpa5 eval')
 arg_parser.add_argument('--model_max_length', type=int,
                         default=512, help='max input dimension/length of the model')
 arg_parser.add_argument('--num_to_multisample', type=int, nargs="+",
@@ -307,12 +307,12 @@ def main():
 
     print(f'Saving model to {save_name}')
     # Callbacks
-    # if not args.wandb_disable:
-    wandb.init(#entity="author-edu",
-                project='part'  # CrossGenre
-                #id=save_name,
-                )
-    wandb.login()
+    if not args.wandb_disable:
+        wandb.init(#entity="author-edu",
+                    project='part'  # CrossGenre
+                    #id=save_name,
+                    )
+        wandb.login()
     logger = WandbLogger(name=save_name, project="part")
     # else:
     #     logger = True
@@ -338,7 +338,7 @@ def main():
                       precision='16-mixed',
                       val_check_interval=VALID_STEPS_INTERVAL,
                       check_val_every_n_epoch=None,
-                    #   limit_val_batches=50,
+                      limit_val_batches=50,
                       num_sanity_val_steps=0,
                       #   accumulate_grad_batches=8,
                       callbacks=[checkpoint_callback, lr_monitor]
