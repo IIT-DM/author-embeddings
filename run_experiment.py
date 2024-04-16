@@ -100,7 +100,7 @@ arg_parser.add_argument('--num_layers', type=int,
 arg_parser.add_argument('--weight_decay', type=float,
                         default=0.01, help='Weight decay')
 arg_parser.add_argument('--training_steps', type=int,
-                        default=4000, help='Number of training steps')
+                        default=1000, help='Number of training steps')
 arg_parser.add_argument('--warmup_steps', type=int,
                         default=200, help='Number of warmup steps')
 arg_parser.add_argument('--do_unfreeze', action='store_true',
@@ -115,6 +115,7 @@ arg_parser.add_argument('--unfreeze_layer_limit', type=int,
                         default=float('inf'), help='Maximum number of layers to unfreeze')
 arg_parser.add_argument('--unfreeze_direction', type=int, default=-1,
                         choices=[-1, 1], help='Unfreeze direction: 1 for input to output, -1 for output to input')
+arg_parser.add_argument('--valid_step_interval', type=int, default=100, help='Batch size')
 # arg_parser.add_argument('--wandb_project', required=True, type=str, help="The wandb_project to use")
 args = arg_parser.parse_args()
 
@@ -160,6 +161,8 @@ SAMPLED_ENCODER_LAYERS = list(args.sampled_encoder_layers)
 
 if MODEL_TYPE == "lstm":
     MODEL = ContrastiveLSTMHead
+elif MODEL_TYPE == "long_attention":
+    MODEL = ContrastiveGRUHead
 elif MODEL_TYPE == 'transformer':
     MODEL = ContrastiveTransformerHead
 elif MODEL_TYPE == "projection_lstm":
@@ -268,7 +271,7 @@ def main():
                                               shuffle=False)
     else:
         train_data = build_dataset(train,
-                                #    steps=TRAINING_STEPS,
+                                   steps=TRAINING_STEPS,
                                    batch_size=BATCH_SIZE,
                                    num_workers=8,
                                    prefetch_factor=8,

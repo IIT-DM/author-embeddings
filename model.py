@@ -3,7 +3,7 @@ import torch
 from transformers import AdamW, get_linear_schedule_with_warmup, AutoModel, AutoTokenizer
 
 import pytorch_lightning as pl
-from modules import DynamicLSTM, SimpleTransformer
+from modules import DynamicLSTM, DynamicGRU, SimpleTransformer
 from iarpa5.eval import run_iarpa5_eval
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.checkpoint import checkpoint
@@ -439,6 +439,115 @@ class ContrastiveLSTMHead(ContrastivePretrain):
             return pooled_embed
         else:
             return F.normalize(pooled_embed)
+
+class ContrastiveGRUHead(ContrastivePretrain):
+    def __init__(self, transformer=None,
+                 init_learning_rate=5e-3,
+                 weight_decay=.01,
+                 num_warmup_steps=0,
+                 num_training_steps=8000,
+                 enable_scheduler=False,
+                 head_hidden_size=128,
+                 head_input_size=256,
+                 num_head_layers=1,
+                 loss_str='infoNCE',
+                 tokenizer=None,
+                 do_unfreeze=False,
+                 adapter_model=False,
+                 max_length = 512,
+                 **kwargs,
+                 ):
+        super().__init__()
+
+        # Save hyperparameters for training
+        self.init_learning_rate = init_learning_rate
+        self.weight_decay = weight_decay
+        self.num_warmup_steps = num_warmup_steps
+        self.num_training_steps = num_training_steps
+        self.enable_scheduler = enable_scheduler
+        self.head_hidden_size = head_hidden_size
+        self.head_input_size = head_input_size
+        self.loss_str = loss_str
+        self.num_head_layers = num_head_layers
+        self.do_unfreeze = do_unfreeze
+        self.adapter_model = adapter_model
+        self.init_temperature = kwargs.get("init_temperature", 3.0)
+        self.unfreeze_layer_limit = kwargs.get('unfreeze_layer_limit', None)
+        self.unfrozen_learning_rate = kwargs.get('unfrozen_learning_rate', None)
+        self.unfreeze_direction = kwargs.get('unfreeze_direction', None)
+        self.unfreeze_step_interval = kwargs.get('unfreeze_step_interval', None)
+        self.no_iarpa = kwargs.get('no_iarpa', None)
+        self.dropout = kwargs.get('dropout', 0.1)
+        self.sampled_encoder_layers = kwargs.get('sampled_encoder_layers', [-1])
+        self.max_length = max_length
+
+        self.save_hyperparameters(ignore=['transformer'])
+
+        if transformer:
+            self.set_transformer(transformer, tokenizer)
+            
+        self.temperature = torch.nn.Parameter(torch.Tensor([self.init_temperature]))
+        # self.temperature.requires_grad = False
+        self.epsilon = 1e-8
+
+    def set_transformer(self, transformer, tokenizer):
+        self.transformer = transformer
+        self.tokenizer = tokenizer
+        self.tokenizer.model_max_length = self.max_length
+        
+        self.projection = torch.nn.Sequential(
+            torch.nn.Linear(transformer.config.hidden_size,
+                            self.head_input_size),
+            torch.nn.ReLU()
+        )
+        self.pooler = DynamicGRU(self.head_input_size,
+                                  self.head_hidden_size,
+                                  num_layers=self.num_head_layers,
+                                  dropout=self.dropout,
+                                  bidirectional=True)
+        
+        self.switch_finetune(False)  
+
+    def on_save_checkpoint(self, checkpoint):
+        checkpoint['transformer_state_dict'] = self.transformer.state_dict()
+        checkpoint['transformer_config'] = self.transformer.config
+        checkpoint['tokenizer_state'] = self.tokenizer
+
+    def on_load_checkpoint(self, checkpoint):
+        # Instantiate the transformer from the saved config
+        self.transformer = AutoModel.from_config(
+            checkpoint['transformer_config'])
+        self.tokenizer = checkpoint['tokenizer_state']
+
+        # Load state dict
+        self.transformer.load_state_dict(checkpoint['transformer_state_dict'])
+        self.set_transformer(self.transformer, self.tokenizer)
+
+    def forward(self, input_ids, attention_mask=None):
+        output = self.transformer(input_ids, attention_mask)
+        
+        # Check if hidden_states are available
+        if 'hidden_states' in output:
+            # Extract the layers specified in sampled_encoder_layers
+            sampled_layers = [output.hidden_states[layer] for layer in self.sampled_encoder_layers]
+            # Stack the sampled layers and compute their mean
+            embeds = torch.mean(torch.stack(sampled_layers), dim=0)
+        else:
+            # Fallback to the last hidden state if hidden_states are not available
+            embeds = output.last_hidden_state
+
+        # Apply the projection
+        embeds = self.projection(embeds)
+
+        # Pool the projected embeddings
+        pooled_embed = self.pooler(embeds, attention_mask)
+
+        # Return based on the loss strategy
+        if self.loss_str == 'infoNCE_euclidean':
+            return pooled_embed
+        else:
+            return F.normalize(pooled_embed)
+
 
 
 class ContrastiveLSTMProjectionHead(ContrastiveLSTMHead):
