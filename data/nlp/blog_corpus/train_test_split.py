@@ -12,8 +12,8 @@ def train_test_split_by_author(df, test_size=0.05, random_state=42):
 
 blog_data = pd.read_csv("data/nlp/blog_corpus/blog_as_csv_preprocessed_deberta.csv")
 blog_train, blog_test = train_test_split_by_author(blog_data)
-blog_train.to_csv("data/nlp/blog_corpus/blog_train_deberta.csv", index=False)
-blog_test.to_csv("data/nlp/blog_corpus/blog_test_deberta.csv", index=False)
+blog_train.to_csv("data/nlp/blog_corpus/blog_train.csv", index=False)
+blog_test.to_csv("data/nlp/blog_corpus/blog_test.csv", index=False)
 
 
 # reddit_data = pd.read_csv("data/nlp/reddit_corpus/reddit_as_csv_preprocessed.csv")
