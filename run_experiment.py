@@ -115,7 +115,7 @@ arg_parser.add_argument('--unfreeze_layer_limit', type=int,
                         default=float('inf'), help='Maximum number of layers to unfreeze')
 arg_parser.add_argument('--unfreeze_direction', type=int, default=-1,
                         choices=[-1, 1], help='Unfreeze direction: 1 for input to output, -1 for output to input')
-arg_parser.add_argument('--wandb_project', required=True, type=str, help="The wandb_project to use")
+# arg_parser.add_argument('--wandb_project', required=True, type=str, help="The wandb_project to use")
 args = arg_parser.parse_args()
 
 BATCH_SIZE = args.batch_size
@@ -305,13 +305,13 @@ def main():
 
     print(f'Saving model to {save_name}')
     # Callbacks
-    if not args.wandb_disable:
-        wandb.login()
-        wandb.init(entity="author-edu",
-                   project=args.wandb_project,  # CrossGenre
-                   id=save_name,
-                   )
-    logger = WandbLogger(name=save_name, config=args)
+    # if not args.wandb_disable:
+    wandb.init(#entity="author-edu",
+                project='part'  # CrossGenre
+                #id=save_name,
+                )
+    wandb.login()
+    logger = WandbLogger(name=save_name, project="part")
     # else:
     #     logger = True
 
