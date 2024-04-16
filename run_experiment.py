@@ -161,7 +161,7 @@ SAMPLED_ENCODER_LAYERS = list(args.sampled_encoder_layers)
 
 if MODEL_TYPE == "lstm":
     MODEL = ContrastiveLSTMHead
-elif MODEL_TYPE == "long_attention":
+elif MODEL_TYPE == "gru":
     MODEL = ContrastiveGRUHead
 elif MODEL_TYPE == 'transformer':
     MODEL = ContrastiveTransformerHead
