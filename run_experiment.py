@@ -45,7 +45,7 @@ arg_parser.add_argument('--transformer_adapter', action='store_true',
 arg_parser.add_argument('--wandb_disable', action='store_true',
                         help='disable wandb')
 arg_parser.add_argument('--model', type=str, required=True, help='Model type',
-                        choices=['lstm', "projection_lstm", "long_lstm", 'transformer', "long_attention"])
+                        choices=['lstm', "gru", "projection_lstm", "long_lstm", 'transformer', "long_attention"])
 arg_parser.add_argument('--scheduler', type=str, default='none', help='Model type',
                         choices=['enable', 'none'],
                         )
