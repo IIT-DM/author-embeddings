@@ -81,8 +81,8 @@ arg_parser.add_argument('--monitor_mode', type=str, required=False, choices=['ma
                         )
 arg_parser.add_argument('--valid_step_interval', type=int,
                         default=100, help='')
-arg_parser.add_argument('--no_iarpa', action='store_true',
-                        help='dont do Iarpa5 eval')
+# arg_parser.add_argument('--no_iarpa', action='store_true',
+#                         help='dont do Iarpa5 eval')
 arg_parser.add_argument('--model_max_length', type=int,
                         default=512, help='max input dimension/length of the model')
 arg_parser.add_argument('--num_to_multisample', type=int, nargs="+",

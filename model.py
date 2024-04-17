@@ -4,7 +4,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup, AutoModel, Auto
 
 import pytorch_lightning as pl
 from modules import DynamicLSTM, DynamicGRU, SimpleTransformer
-from iarpa5.eval import run_iarpa5_eval
+# from iarpa5.eval import run_iarpa5_eval
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.checkpoint import checkpoint
 import torch.nn as nn
@@ -317,10 +317,10 @@ class ContrastivePretrain(pl.LightningModule):
         with torch.no_grad():
             if batch_idx == 0:
                 self.log("temperature", self.temperature.detach())
-                if not(self.no_iarpa):
-                    iarpa_results = run_iarpa5_eval(
-                        self, device=self.device, distance='euclidean')
-                    self.log_dict(iarpa_results)
+                # if not(self.no_iarpa):
+                #     iarpa_results = run_iarpa5_eval(
+                #         self, device=self.device, distance='euclidean')
+                #     self.log_dict(iarpa_results)
             return self.eval_batch(val_batch, loss_str=self.loss_str, mode='valid')
 
     def test_step(self, test_batch, batch_idx):
@@ -368,7 +368,7 @@ class ContrastiveLSTMHead(ContrastivePretrain):
         self.unfrozen_learning_rate = kwargs.get('unfrozen_learning_rate', None)
         self.unfreeze_direction = kwargs.get('unfreeze_direction', None)
         self.unfreeze_step_interval = kwargs.get('unfreeze_step_interval', None)
-        self.no_iarpa = kwargs.get('no_iarpa', None)
+        # self.no_iarpa = kwargs.get('no_iarpa', None)
         self.dropout = kwargs.get('dropout', 0.1)
         self.sampled_encoder_layers = kwargs.get('sampled_encoder_layers', [-1])
         self.max_length = max_length
@@ -476,7 +476,7 @@ class ContrastiveGRUHead(ContrastivePretrain):
         self.unfrozen_learning_rate = kwargs.get('unfrozen_learning_rate', None)
         self.unfreeze_direction = kwargs.get('unfreeze_direction', None)
         self.unfreeze_step_interval = kwargs.get('unfreeze_step_interval', None)
-        self.no_iarpa = kwargs.get('no_iarpa', None)
+        # self.no_iarpa = kwargs.get('no_iarpa', None)
         self.dropout = kwargs.get('dropout', 0.1)
         self.sampled_encoder_layers = kwargs.get('sampled_encoder_layers', [-1])
         self.max_length = max_length
